@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import operator
 import os
 from pydantic import BaseModel, Field
@@ -9,10 +12,8 @@ from langgraph.graph import StateGraph, END, START
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 # from langchain_ollama import ChatOllama
-from dotenv import load_dotenv
 from tools import book_hotel, book_flight
 
-load_dotenv()
 
 # # 2. Setup LLM
 # llm = ChatCohere(model="command-a-03-2025", temperature=0, api_key=os.getenv("COHERE_API_KEY"))
@@ -23,7 +24,7 @@ load_dotenv()
 #     temperature=0, # Keep temp at 0 for more reliable tool calls
 # )
 
-llm = ChatOpenAI()
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 # 3. Define Sub-Agents
 # Note: These are compiled graphs themselves
@@ -105,17 +106,23 @@ app = workflow.compile()
 def run_workflow(query: str):
     inputs = {"messages": [HumanMessage(content=query)]}
     
-    # Using stream_mode="values" to see the results
-    for event in app.stream(inputs, stream_mode="values"):
-        # This will print every message as it is added to the state
-        message = event["messages"][-1]
-        if message.type != "human": # Skip printing the question again
-            message.pretty_print()
+    print("DEBUG: Sending request to Graph...")
+    # Using stream_mode="updates" to see state changes as they happen
+    for event in app.stream(inputs, stream_mode="updates"):
+        for node_name, state_update in event.items():
+            print(f"\n[ACTIVE NODE: {node_name}]")
+            
+            # Print messages from this node
+            if "messages" in state_update:
+                for msg in state_update["messages"]:
+                    if msg.type != "human":
+                        msg.pretty_print()
 
 if __name__ == "__main__":
     print("--- Hotel Request ---")
     # run_workflow("I want to book a hotel in Paris")
-    run_workflow("I need an accomidation in Paris for 3 days.")
+    result = run_workflow("I need an accomidation in Paris for 3 days.")
+    # print(result)
     # run_workflow("I want to book a hotel in New York for 5 nights.")
     # run_workflow("I want to book a flight to Canada")
     

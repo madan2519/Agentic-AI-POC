@@ -3,7 +3,7 @@ from typing import Annotated, Sequence, TypedDict
 from langchain_core.messages import BaseMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END, START
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_react_agent
 from langchain_openai import ChatOpenAI # Using OpenAI as per your update
 from dotenv import load_dotenv
 from tools import book_hotel, book_flight
@@ -11,7 +11,7 @@ from tools import book_hotel, book_flight
 load_dotenv()
 
 # 2. Setup LLM
-llm = ChatOpenAI()
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 # 3. Define Sub-Agents
 # These agents stay specialized to their own tools
