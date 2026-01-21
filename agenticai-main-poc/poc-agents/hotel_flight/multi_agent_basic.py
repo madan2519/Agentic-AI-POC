@@ -6,20 +6,9 @@ from langgraph.graph import StateGraph, END, START
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI # Using OpenAI as per your update
 from dotenv import load_dotenv
+from tools import book_hotel, book_flight
 
 load_dotenv()
-
-
-# 1. Setup Tools
-@tool
-def book_hotel(city: str) -> str:
-    """Useful for booking hotel rooms in a specific city."""
-    return f"Successfully booked a 5-star hotel in {city}."
-
-@tool
-def book_flight(destination: str) -> str:
-    """Useful for finding or booking flights to a destination."""
-    return f"Found a direct flight to {destination} for $400."
 
 # 2. Setup LLM
 llm = ChatOpenAI()
